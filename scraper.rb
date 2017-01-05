@@ -55,9 +55,9 @@ def scrape_person(url)
   }
   data[:image] = URI.join(url, data[:image]).to_s unless data[:image].to_s.empty?
 
-  url_am = URI.join url, noko.css('img.lang[title~=Armenian]').xpath('ancestor::a/@href').text
-  noko_am = noko_for(url_am)
-  data[:name__am] = noko_am.css('.dep_name').text.tidy
+  url_hy = URI.join url, noko.css('img.lang[title~=Armenian]').xpath('ancestor::a/@href').text
+  noko_hy = noko_for(url_hy)
+  data[:name__hy] = noko_hy.css('.dep_name').text.tidy
 
   url_ru = URI.join url, noko.css('img.lang[title~=Russian]').xpath('ancestor::a/@href').text
   noko_ru = noko_for(url_ru)
