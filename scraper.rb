@@ -72,4 +72,5 @@ def scrape_person(url)
   end
 end
 
+ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
 scrape_list('http://parliament.am/deputies.php?lang=eng')
