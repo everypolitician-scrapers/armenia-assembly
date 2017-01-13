@@ -113,17 +113,16 @@ def scrape(h)
   klass.new(response: Scraped::Request.new(url: url).response)
 end
 
-def scrape_person(url)
+def person_data(url)
   data = scrape(url => MemberPage).to_h
   data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
   data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
-
-  data.delete(:factions).each do |f|
-    # puts data.merge(f)
-    ScraperWiki.save_sqlite(%i(id term start_date), data.merge(f))
-  end
+  data.delete(:factions).map { |f| data.merge(f) }
 end
 
 start = 'http://parliament.am/deputies.php?lang=eng'
+data = scrape(start => MembersPage).member_urls.flat_map { |url| person_data(url) }
+# puts data.map { |p| p.sort_by { |k, v| k }.to_h }
+
 ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
-scrape(start => MembersPage).member_urls.each { |url| scrape_person(url) }
+ScraperWiki.save_sqlite(%i(id term start_date), data)
