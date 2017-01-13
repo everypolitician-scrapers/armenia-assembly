@@ -117,7 +117,14 @@ def person_data(url)
 end
 
 start = 'http://parliament.am/deputies.php?lang=eng'
-data = scrape(start => MembersPage).member_urls.flat_map { |url| person_data(url) }
+
+# Hard-coded list of Members who were in the term, but are no longer listed
+MEMBER = 'http://parliament.am/deputies.php?sel=details&ID=%s&lang=eng'
+vanished_members = %w(1013 1129 1136)
+vanished_urls = vanished_members.map { |id| MEMBER % id }
+
+to_fetch = scrape(start => MembersPage).member_urls | vanished_urls
+data = to_fetch.flat_map { |url| person_data(url) }
 # puts data.map { |p| p.sort_by { |k, v| k }.to_h }
 
 ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
