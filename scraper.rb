@@ -57,10 +57,6 @@ class MemberPage < Scraped::HTML
     box.css('a[href*="mailto:"]').text
   end
 
-  field :term do
-    5
-  end
-
   field :source do
     url.to_s
   end
@@ -117,7 +113,7 @@ def person_data(url)
   data = scrape(url => MemberPage).to_h
   data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
   data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
-  data.delete(:factions).map { |f| data.merge(f) }
+  data.delete(:factions).map { |f| data.merge(term: 5).merge(f) }
 end
 
 start = 'http://parliament.am/deputies.php?lang=eng'
