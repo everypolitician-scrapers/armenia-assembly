@@ -14,6 +14,15 @@ def noko_for(url)
   Nokogiri::HTML(open(url).read)
 end
 
+class MembersPage < Scraped::HTML
+  decorator Scraped::Response::Decorator::AbsoluteUrls
+
+  field :member_urls do
+    noko.css('.dep_name_list a[href*="ID="]/@href').map(&:text)
+  end
+end
+
+
 FACTIONS = {
    '"Republican" (RPA) Faction' => %w(Republican RPA),
    '"Prosperous Armenia" Faction' => ['Prosperous Armenia', 'PA'],
@@ -29,11 +38,8 @@ def faction_from(text)
 end
 
 def scrape_list(url)
-  noko = noko_for(url)
-  noko.css('.dep_name_list a[href*="ID="]/@href').each do |href|
-    link = URI.join url, href
-    scrape_person(link)
-  end
+  page = MembersPage.new(response: Scraped::Request.new(url: url).response)
+  page.member_urls.each { |href| scrape_person(href) }
 end
 
 def scrape_person(url)
