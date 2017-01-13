@@ -73,7 +73,8 @@ class MemberPage < Scraped::HTML
     noko.css('img.lang[title~=Russian]').xpath('ancestor::a/@href').text
   end
 
-  def factions
+  # TODO: split this out to a fragment
+  field :factions do
     box.xpath('//td[div[text()="Factions"]]/following-sibling::td//table//td').reject { |n| n.text.tidy.empty? }.map do |f|
       start_date, end_date = f.css('span').text.split(' - ').map { |d| d.split('.').reverse.join('-') }
       faction, faction_id = faction_from f.css('a').text
@@ -118,12 +119,11 @@ def scrape_list(url)
 end
 
 def scrape_person(url)
-  page = scrape(url => MemberPage)
-  data = page.to_h
+  data = scrape(url => MemberPage).to_h
   data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
   data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
 
-  page.factions.each do |f|
+  data.delete(:factions).each do |f|
     # puts data.merge(f)
     ScraperWiki.save_sqlite(%i(id term start_date), data.merge(f))
   end
