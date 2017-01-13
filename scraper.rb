@@ -65,11 +65,11 @@ class MemberPage < Scraped::HTML
     url.to_s
   end
 
-  def url_hy
+  field :url_hy do
     noko.css('img.lang[title~=Armenian]').xpath('ancestor::a/@href').text
   end
 
-  def url_ru
+  field :url_ru do
     noko.css('img.lang[title~=Russian]').xpath('ancestor::a/@href').text
   end
 
@@ -119,10 +119,9 @@ end
 
 def scrape_person(url)
   page = scrape(url => MemberPage)
-  data = page.to_h.merge(
-    name__hy: scrape(page.url_hy => MemberPage).name,
-    name__ru: scrape(page.url_ru => MemberPage).name,
-  )
+  data = page.to_h
+  data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
+  data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
 
   page.factions.each do |f|
     # puts data.merge(f)
