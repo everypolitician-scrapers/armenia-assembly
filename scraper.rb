@@ -14,15 +14,18 @@ def noko_for(url)
   Nokogiri::HTML(open(url).read)
 end
 
+FACTIONS = {
+   '"Republican" (RPA) Faction' => %w(Republican RPA),
+   '"Prosperous Armenia" Faction' => ['Prosperous Armenia', 'PA'],
+   '"Heritage" Faction' => %w(Heritage H),
+   '"Armenian Revolutionary Federation" Faction' => ['Armenian Revolutionary Federation', 'ARF'],
+   '"Rule of Law" Faction' => ['Rule of Law', 'ROL'],
+   'Not included' => %w(Independent _IND),
+   '"Armenian National Congress" Faction' => ['Armenian National Congress', 'ANC'],
+}.freeze
+
 def faction_from(text)
-  return %w(Republican RPA) if text == '"Republican" (RPA) Faction'
-  return ['Prosperous Armenia', 'PA'] if text == '"Prosperous Armenia" Faction'
-  return %w(Heritage H) if text == '"Heritage" Faction'
-  return ['Armenian Revolutionary Federation', 'ARF'] if text == '"Armenian Revolutionary Federation" Faction'
-  return ['Rule of Law', 'ROL'] if text == '"Rule of Law" Faction'
-  return %w(Independent _IND) if text == 'Not included'
-  return ['Armenian National Congress', 'ANC'] if text == '"Armenian National Congress" Faction'
-  raise "unknown faction: #{text}"
+  FACTIONS[text] or raise "unknown faction: #{text}"
 end
 
 def scrape_list(url)
