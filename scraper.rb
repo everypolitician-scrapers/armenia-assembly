@@ -113,11 +113,6 @@ def scrape(h)
   klass.new(response: Scraped::Request.new(url: url).response)
 end
 
-
-def scrape_list(url)
-  scrape(url => MembersPage).member_urls.each { |href| scrape_person(href) }
-end
-
 def scrape_person(url)
   data = scrape(url => MemberPage).to_h
   data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
@@ -129,5 +124,6 @@ def scrape_person(url)
   end
 end
 
+start = 'http://parliament.am/deputies.php?lang=eng'
 ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
-scrape_list('http://parliament.am/deputies.php?lang=eng')
+scrape(start => MembersPage).member_urls.each { |url| scrape_person(url) }
