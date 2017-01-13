@@ -14,64 +14,111 @@ def noko_for(url)
   Nokogiri::HTML(open(url).read)
 end
 
-def faction_from(text)
-  return %w(Republican RPA) if text == '"Republican" (RPA) Faction'
-  return ['Prosperous Armenia', 'PA'] if text == '"Prosperous Armenia" Faction'
-  return %w(Heritage H) if text == '"Heritage" Faction'
-  return ['Armenian Revolutionary Federation', 'ARF'] if text == '"Armenian Revolutionary Federation" Faction'
-  return ['Rule of Law', 'ROL'] if text == '"Rule of Law" Faction'
-  return %w(Independent _IND) if text == 'Not included'
-  return ['Armenian National Congress', 'ANC'] if text == '"Armenian National Congress" Faction'
-  raise "unknown faction: #{text}"
-end
+class MembersPage < Scraped::HTML
+  decorator Scraped::Response::Decorator::AbsoluteUrls
 
-def scrape_list(url)
-  noko = noko_for(url)
-  noko.css('.dep_name_list a[href*="ID="]/@href').each do |href|
-    link = URI.join url, href
-    scrape_person(link)
+  field :member_urls do
+    noko.css('.dep_name_list a[href*="ID="]/@href').map(&:text)
   end
 end
 
-def scrape_person(url)
-  noko = noko_for(url)
-  box = noko.css('.dep_description')
-  data = {
-    id:         url.to_s[/ID=(\d+)/, 1],
-    name:       noko.css('.dep_name').text.tidy,
-    role:       noko.css('.dep_position').text.tidy,
-    image:      noko.css('img.dep_pic/@src').text,
-    district:   box.xpath('//td[div[text()="District"]]/following-sibling::td').text,
-    party:      box.xpath('//td[div[text()="Party"]]/following-sibling::td').text,
-    birth_date: box.xpath('//td[div[text()="Birth date"]]/following-sibling::td').text.split('.').reverse.join('-'),
-    email:      box.css('a[href*="mailto:"]').text,
-    term:       5,
-    source:     url.to_s,
-  }
-  data[:image] = URI.join(url, data[:image]).to_s unless data[:image].to_s.empty?
+class MemberPage < Scraped::HTML
+  decorator Scraped::Response::Decorator::AbsoluteUrls
 
-  url_hy = URI.join url, noko.css('img.lang[title~=Armenian]').xpath('ancestor::a/@href').text
-  noko_hy = noko_for(url_hy)
-  data[:name__hy] = noko_hy.css('.dep_name').text.tidy
-
-  url_ru = URI.join url, noko.css('img.lang[title~=Russian]').xpath('ancestor::a/@href').text
-  noko_ru = noko_for(url_ru)
-  data[:name__ru] = noko_ru.css('.dep_name').text.tidy
-
-  factions = box.xpath('//td[div[text()="Factions"]]/following-sibling::td//table//td').reject { |n| n.text.tidy.empty? }.map do |f|
-    start_date, end_date = f.css('span').text.split(' - ').map { |d| d.split('.').reverse.join('-') }
-    faction, faction_id = faction_from f.css('a').text
-    {
-      faction_id: faction_id,
-      faction:    faction,
-      start_date: start_date,
-      end_date:   end_date,
-    }
+  field :id do
+    source[/ID=(\d+)/, 1]
   end
-  factions.each do |f|
-    ScraperWiki.save_sqlite(%i(id term start_date), data.merge(f))
+
+  field :name do
+    noko.css('.dep_name').text.tidy
+  end
+
+  field :role do
+    noko.css('.dep_position').text.tidy
+  end
+
+  field :image do
+    noko.css('img.dep_pic/@src').text
+  end
+
+  field :district do
+    box.xpath('//td[div[text()="District"]]/following-sibling::td').text
+  end
+
+  field :party do
+    box.xpath('//td[div[text()="Party"]]/following-sibling::td').text
+  end
+
+  field :birth_date do
+    box.xpath('//td[div[text()="Birth date"]]/following-sibling::td').text.split('.').reverse.join('-')
+  end
+
+  field :email do
+    box.css('a[href*="mailto:"]').text
+  end
+
+  field :source do
+    url.to_s
+  end
+
+  field :url_hy do
+    noko.css('img.lang[title~=Armenian]').xpath('ancestor::a/@href').text
+  end
+
+  field :url_ru do
+    noko.css('img.lang[title~=Russian]').xpath('ancestor::a/@href').text
+  end
+
+  # TODO: split this out to a fragment
+  field :factions do
+    box.xpath('//td[div[text()="Factions"]]/following-sibling::td//table//td').reject { |n| n.text.tidy.empty? }.map do |f|
+      start_date, end_date = f.css('span').text.split(' - ').map { |d| d.split('.').reverse.join('-') }
+      faction, faction_id = faction_from f.css('a').text
+      {
+        faction_id: faction_id,
+        faction:    faction,
+        start_date: start_date,
+        end_date:   end_date,
+      }
+    end
+  end
+
+  private
+
+  def box
+    noko.css('.dep_description')
+  end
+
+  FACTIONS = {
+    '"Republican" (RPA) Faction'                  => %w(Republican RPA),
+    '"Prosperous Armenia" Faction'                => ['Prosperous Armenia', 'PA'],
+    '"Heritage" Faction'                          => %w(Heritage H),
+    '"Armenian Revolutionary Federation" Faction' => ['Armenian Revolutionary Federation', 'ARF'],
+    '"Rule of Law" Faction'                       => ['Rule of Law', 'ROL'],
+    'Not included'                                => %w(Independent _IND),
+    '"Armenian National Congress" Faction'        => ['Armenian National Congress', 'ANC'],
+  }.freeze
+
+  def faction_from(text)
+    FACTIONS[text] or raise "unknown faction: #{text}"
   end
 end
+
+def scrape(h)
+  url, klass = h.to_a.first
+  klass.new(response: Scraped::Request.new(url: url).response)
+end
+
+def person_data(url)
+  data = scrape(url => MemberPage).to_h
+  data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
+  data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
+  data.delete(:factions).map { |f| data.merge(term: 5).merge(f) }
+end
+
+start = 'http://parliament.am/deputies.php?lang=eng'
+data = scrape(start => MembersPage).member_urls.flat_map { |url| person_data(url) }
+# puts data.map { |p| p.sort_by { |k, v| k }.to_h }
 
 ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
-scrape_list('http://parliament.am/deputies.php?lang=eng')
+ScraperWiki.save_sqlite(%i(id term start_date), data)
