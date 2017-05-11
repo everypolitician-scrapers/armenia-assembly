@@ -127,5 +127,5 @@ to_fetch = scrape(start => MembersPage).member_urls | vanished_urls
 data = to_fetch.flat_map { |url| person_data(url) }
 # puts data.map { |p| p.sort_by { |k, v| k }.to_h }
 
-ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
+ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
 ScraperWiki.save_sqlite(%i[id term start_date], data)
