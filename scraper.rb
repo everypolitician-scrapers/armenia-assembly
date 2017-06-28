@@ -15,7 +15,7 @@ def noko_for(url)
 end
 
 class MembersPage < Scraped::HTML
-  decorator Scraped::Response::Decorator::AbsoluteUrls
+  decorator Scraped::Response::Decorator::CleanUrls
 
   field :member_urls do
     noko.css('.dep_name_list a[href*="ID="]/@href').map(&:text)
@@ -23,7 +23,7 @@ class MembersPage < Scraped::HTML
 end
 
 class MemberPage < Scraped::HTML
-  decorator Scraped::Response::Decorator::AbsoluteUrls
+  decorator Scraped::Response::Decorator::CleanUrls
 
   field :id do
     source[/ID=(\d+)/, 1]
