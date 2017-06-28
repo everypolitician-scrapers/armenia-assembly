@@ -1,4 +1,10 @@
 GIT
+  remote: https://github.com/everypolitician/combine_popolo_memberships.git
+  revision: 5769841c55abc712ce59835a0fb944b1de12d982
+  specs:
+    combine_popolo_memberships (0.2.0)
+
+GIT
   remote: https://github.com/everypolitician/scraped.git
   revision: c458dd2601a7f1e9596c7c60cf375fee44c3604d
   specs:
@@ -122,6 +128,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  combine_popolo_memberships!
   execjs
   minitest
   minitest-around
