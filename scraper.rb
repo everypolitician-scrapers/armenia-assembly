@@ -91,16 +91,19 @@ class MemberPage < Scraped::HTML
 
   FACTIONS = {
     '"Republican" (RPA) Faction'                  => %w[Republican RPA],
+    '"Republican Party of Armenia" Faction'       => %w[Republican RPA],
     '"Prosperous Armenia" Faction'                => ['Prosperous Armenia', 'PA'],
     '"Heritage" Faction'                          => %w[Heritage H],
     '"Armenian Revolutionary Federation" Faction' => ['Armenian Revolutionary Federation', 'ARF'],
     '"Rule of Law" Faction'                       => ['Rule of Law', 'ROL'],
     'Not included'                                => %w[Independent _IND],
     '"Armenian National Congress" Faction'        => ['Armenian National Congress', 'ANC'],
+    '"Tsarukyan" Faction'                         => %w[Tsarukyan TSAR],
+    '"Way Out" Faction'                           => ['Way Out', 'WO'],
   }.freeze
 
   def faction_from(text)
-    FACTIONS[text] or raise "unknown faction: #{text}"
+    FACTIONS[text.tidy] or raise "unknown faction: #{text}"
   end
 end
 
@@ -113,14 +116,14 @@ def person_data(url)
   data = scrape(url => MemberPage).to_h
   data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
   data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
-  data.delete(:factions).map { |f| data.merge(term: 5).merge(f) }
+  data.delete(:factions).map { |f| data.merge(term: 6).merge(f) }
 end
 
 start = 'http://parliament.am/deputies.php?lang=eng'
 
 # Hard-coded list of Members who were in the term, but are no longer listed
 MEMBER = 'http://parliament.am/deputies.php?sel=details&ID=%s&lang=eng'
-vanished_members = %w[1013 1129 1136]
+vanished_members = %w[]
 vanished_urls = vanished_members.map { |id| MEMBER % id }
 
 to_fetch = scrape(start => MembersPage).member_urls | vanished_urls
