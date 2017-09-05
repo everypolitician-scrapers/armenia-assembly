@@ -128,7 +128,7 @@ vanished_urls = vanished_members.map { |id| MEMBER % id }
 
 to_fetch = scrape(start => MembersPage).member_urls | vanished_urls
 data = to_fetch.flat_map { |url| person_data(url) }
-# puts data.map { |p| p.sort_by { |k, v| k }.to_h }
+data.each { |mem| puts mem.reject { |_, v| v.to_s.empty? }.sort_by { |k, _| k }.to_h } if ENV['MORPH_DEBUG']
 
 ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
 ScraperWiki.save_sqlite(%i[id term start_date], data)
