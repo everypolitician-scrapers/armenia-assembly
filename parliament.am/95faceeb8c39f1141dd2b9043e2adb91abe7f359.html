@@ -11,10 +11,19 @@
 
 <script language="JavaScript">
 <!-- 
-var w = 800;
-var h = 534;
-function popup(url) 
+
+function popup(url,w,h) 
 { 
+
+	if(! w)
+	{
+		var w = 800;
+	}
+	
+	if(! h)
+	{
+		var h = 534;
+	}
 	var left = (screen.width/2)-(w/2);
 	var top = (screen.height/2)-(h/2);
 	popupWindow = window.open(url,"winname",'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
