@@ -11,10 +11,19 @@
 
 <script language="JavaScript">
 <!-- 
-var w = 800;
-var h = 534;
-function popup(url) 
+
+function popup(url,w,h) 
 { 
+
+	if(! w)
+	{
+		var w = 800;
+	}
+	
+	if(! h)
+	{
+		var h = 534;
+	}
 	var left = (screen.width/2)-(w/2);
 	var top = (screen.height/2)-(h/2);
 	popupWindow = window.open(url,"winname",'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
@@ -256,7 +265,7 @@ Married, with two children.</p><br>
 <br>
 ZOOM GRAPHICS<br>
 WWW.ZOOM.AM</div>
-<div class=footer_logo><span  class="last-updated">Site updated <b>24.11.2017</b><br></span><br><img src="images/bottom_logo_eng.gif" width="212" height="52" alt="National Assembly of the Republic of Armenia | Official Web Page | www.parliament.am" title="National Assembly of the Republic of Armenia | Official Web Page | www.parliament.am"><br><div class=news_date style="margin-bottom:20px; margin-top:10px;">&copy; 1996-2017</div></div><div class=footer_addr><span style="color:black;font-weight:normal"></span>19 Baghramyan 0095,<br>
+<div class=footer_logo><span  class="last-updated">Site updated <b>27.11.2017</b><br></span><br><img src="images/bottom_logo_eng.gif" width="212" height="52" alt="National Assembly of the Republic of Armenia | Official Web Page | www.parliament.am" title="National Assembly of the Republic of Armenia | Official Web Page | www.parliament.am"><br><div class=news_date style="margin-bottom:20px; margin-top:10px;">&copy; 1996-2017</div></div><div class=footer_addr><span style="color:black;font-weight:normal"></span>19 Baghramyan 0095,<br>
 Yerevan, Republic of Armenia<br><img src=images/t.gif height=7 width=1><br><img src="images/ico_mail.gif" width="12" height="16" align=left class=footer_m><a href=# class=aria>webmaster@parliament.am</a><br>Information phone line:  (374-10) 588551, (374-11) 513622 
  <br> <a href="/e_request_application.php?lang=eng"> </a></div></div></div></div>
 <!-- BOTTOM END -->
