@@ -18,14 +18,14 @@ response:
     message: OK
   headers:
     Date:
-    - Thu, 12 Jul 2018 10:07:26 GMT
+    - Fri, 13 Jul 2018 07:14:00 GMT
     Server:
     - Apache/2.4.10 (Unix)
     Cache-Control:
     - max-age=60
     Set-Cookie:
     - enc=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/
-    - lang=eng; expires=Sat, 11-Aug-2018 10:07:26 GMT; Max-Age=2592000; path=/
+    - lang=eng; expires=Sun, 12-Aug-2018 07:14:00 GMT; Max-Age=2592000; path=/
     Content-Type:
     - text/html; charset=UTF-8
     Content-Length:
@@ -33,4 +33,4 @@ response:
   body:
     encoding: ASCII-8BIT
   http_version: 
-recorded_at: Thu, 12 Jul 2018 10:13:59 GMT
+recorded_at: Fri, 13 Jul 2018 07:20:34 GMT
