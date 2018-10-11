@@ -96,6 +96,7 @@ class MemberPage < Scraped::HTML
     '"Armenian Revolutionary Federation" Faction' => ['Armenian Revolutionary Federation', 'ARF'],
     '"Rule of Law" Faction'                       => ['Rule of Law', 'ROL'],
     'Not included'                                => %w[Independent _IND],
+    'Not included in faction'                     => %w[Independent _IND],
     '"Armenian National Congress" Faction'        => ['Armenian National Congress', 'ANC'],
     '"Tsarukyan" Faction'                         => %w[Tsarukyan TSAR],
     '"Way Out" Faction'                           => ['Way Out', 'WO'],
