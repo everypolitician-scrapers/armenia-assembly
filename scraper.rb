@@ -70,7 +70,7 @@ class MemberPage < Scraped::HTML
 
   # TODO: split this out to a fragment
   field :factions do
-    box.xpath('//td[div[text()="Factions"]]/following-sibling::td//table//td').reject { |n| n.text.tidy.empty? }.map do |f|
+    box.xpath('//td[div[text()="Faction"]]/following-sibling::td//table//td').reject { |n| n.text.tidy.empty? }.map do |f|
       start_date, end_date = f.css('span').text.split(' - ').map { |d| d.split('.').reverse.join('-') }
       faction, faction_id = faction_from f.css('a').text
       {
@@ -100,6 +100,8 @@ class MemberPage < Scraped::HTML
     '"Armenian National Congress" Faction'        => ['Armenian National Congress', 'ANC'],
     '"Tsarukyan" Faction'                         => %w[Tsarukyan TSAR],
     '"Way Out" Faction'                           => ['Way Out', 'WO'],
+    '"My step" Faction'                           => %w[MyStep MS],
+    '"Bright Armenia" Faction'                    => ['Bright Armenia', 'BA']
   }.freeze
 
   def faction_from(text)
@@ -116,18 +118,11 @@ def person_data(url)
   data = scrape(url => MemberPage).to_h
   data[:name__hy] = scrape(data.delete(:url_hy) => MemberPage).name
   data[:name__ru] = scrape(data.delete(:url_ru) => MemberPage).name
-  data.delete(:factions).map { |f| data.merge(term: 6).merge(f) }
+  data.delete(:factions).map { |f| data.merge(term: 7).merge(f) }
 end
 
 start = 'http://parliament.am/deputies.php?lang=eng'
-
-# Hard-coded list of Members who were in the term, but are no longer listed
-MEMBER = 'http://parliament.am/deputies.php?sel=details&ID=%s&lang=eng'
-vanished_members = %w[]
-vanished_urls = vanished_members.map { |id| MEMBER % id }
-
-to_fetch = scrape(start => MembersPage).member_urls | vanished_urls
-data = to_fetch.flat_map { |url| person_data(url) }
+data = scrape(start => MembersPage).member_urls.flat_map { |url| person_data(url) }
 data.each { |mem| puts mem.reject { |_, v| v.to_s.empty? }.sort_by { |k, _| k }.to_h } if ENV['MORPH_DEBUG']
 
 ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
